@@ -1,106 +1,73 @@
-/*! Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *  SPDX-License-Identifier: MIT-0
- */
-
-'use strict'
-
 import { createApp } from 'vue'
 import App from './App.vue'
-
-// Theming framework
 import { VuesticPlugin } from 'vuestic-ui'
 import 'vuestic-ui/dist/vuestic-ui.css'
-
-// Global event bus
 import mitt from 'mitt'
-const emitter = mitt()
-
-// Amplify imports
 import Amplify from 'aws-amplify'
-
-// Phone number handling
 import VueTelInput from 'vue3-tel-input'
 import 'vue3-tel-input/dist/vue3-tel-input.css'
 
-const app = createApp(App).use(  VuesticPlugin,{
-  components: {
-    VaChip: {
-      outline: true,
-      rounded: false,
-      size: 'large',
-      color: '#000'
-    },
-    VaCard:{
-      stripe: false,
-      stripeColor:"black",
-      square: false
-    },
-    VaButton:{
-      color:"#08c18a"
-    },
+const emitter = mitt()
+const app = createApp(App)
 
-    VaButtoGroup:{
-      color:"#08c18a"
-    }
+app.use(VuesticPlugin, {
+  components: {
+    VaChip: { outline: true, rounded: false, size: 'large', color: '#000' },
+    VaCard: { stripe: false, stripeColor: "black", square: false },
+    VaButton: { color: "#08c18a" },
+    VaButtonGroup: { color: "#08c18a" }
   },
 }).use(VueTelInput)
+
 app.config.globalProperties.emitter = emitter
 
-/* ===================================================
-                      CONFIGURATION
-    You must add your own values here! See the tutorial
-    in the GitHub repo for more information. @jbesw
-   =================================================== */
-
 app.config.globalProperties.$appLogo = 'https://assets.serverlesscoffee.com/images/serverlesspresso-large.png'
-
-// ** Backend config **
 app.config.globalProperties.$appName = 'Validator'
 app.config.globalProperties.$adminApp = true
 
-// Get global vars from local cache
-if (localStorage.UIstate) {
-  const UIstate = JSON.parse(localStorage.UIstate)
-  console.log('Mounted - Local storage: ', UIstate)
-
-  // Hydrating state from local cache
-  app.config.globalProperties.$APIurl = UIstate.APIurl || ''
-  app.config.globalProperties.$region = UIstate.region || ''
-
-  app.config.globalProperties.$ordersAPIurl = UIstate.ordersAPIurl || ''
-  app.config.globalProperties.$APIconfigURL = UIstate.APIconfigURL || ''
-  app.config.globalProperties.$poolId = UIstate.$poolId || ''
-  app.config.globalProperties.$ConfigEndpoint = UIstate.ConfigEndpoint || '',
-  app.config.globalProperties.$host = UIstate.host || ''
+const defaults = {
+  region: '',
+  userPoolId: '',
+  userPoolWebClientId: '',
+  identityPoolId: '',
+  orderManagerEndpoint: '',
+  APIGWEndpointValidatorService: '',
+  APIGWEndpointConfigService: '',
+  IoTHost: '',
 }
 
-// Are global vars initialized?
+const UIstate = localStorage.UIstate ? JSON.parse(localStorage.UIstate) : {}
+const config = { ...defaults, ...UIstate }
+
+// Assign global properties
+Object.entries(config).forEach(([key, value]) => {
+  app.config.globalProperties[`$${key}`] = value
+})
+
+// Validate required variables
+const requiredVars = Object.values(config)
+const hasAllVars = requiredVars.every(val => val && val !== '')
+
 app.config.globalProperties.$init = false
 
-// Only init if settings are provided
-if (app.config.globalProperties.$APIurl === '' ||
-    app.config.globalProperties.$region === '' ||
-    app.config.globalProperties.$ordersAPIurl === '' ||
-    app.config.globalProperties.$c === '' ||
-    app.config.globalProperties.$poolId === '' ||
-    app.config.globalProperties.$ConfigEndpoint === '' ||
-    app.config.globalProperties.$host === '') {
-
-    try {
-      Amplify.configure({
-        Auth: {
-          region: this.$region,
-          identityPoolRegion: this.$region,
-          userPoolId: this.$poolId,
-          userPoolWebClientId: this.$host,
-          mandatorySignIn: false,
-          authenticationFlowType: 'CUSTOM_AUTH',
-        }
-      })
-    } catch (err) {
-      console.error('Error: ', err)
-    }
+if (hasAllVars) {
+  try {
+    Amplify.configure({
+      Auth: {
+        region: config.region,
+        identityPoolRegion: config.region,
+        userPoolId: config.userPoolId,
+        userPoolWebClientId: config.userPoolWebClientId,
+        mandatorySignIn: false,
+        endpoint: "https://localhost.localstack.cloud:4566",
+      }
+    })
     app.config.globalProperties.$init = true
- }
+  } catch (err) {
+    console.error('Amplify configuration error:', err)
+  }
+} else {
+  console.warn('Missing configuration variables:', config)
+}
 
 app.mount('#app')

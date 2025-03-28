@@ -5,10 +5,9 @@
       <div class="twoColContainer">
         <va-list-item
           style="width: 49%;"
-          v-for="(order, index) in orders"
+          v-for="(order)  in orders"
           :key="order.orderId"
         >
-          <transition name="fade" v-if="index <= 13">
             <div v-if="order.orderNumber">
               <div class="row">
                 <div class=" md4">
@@ -26,7 +25,6 @@
               </div>
               <va-list-separator spaced />
             </div>
-          </transition>
         </va-list-item>
       </div>
     </va-card-content>
@@ -72,7 +70,7 @@ export default {
       const jwtToken = session.getAccessToken().jwtToken
 
       try {
-        const { data } = await axios.get(`${this.$ordersAPIurl}/orders?state=COMPLETED`,
+        const { data } = await axios.get(`${this.$orderManagerEndpoint}/orders?state=COMPLETED`,
           {
             headers: { Authorization: "Bearer " + jwtToken },
           }

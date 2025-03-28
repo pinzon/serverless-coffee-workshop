@@ -3,8 +3,7 @@
     <va-card-title><h1>Preparing</h1></va-card-title>
     <va-card-content>
       <div class="twoColContainer">
-        <va-list-item style="width: 49%;" v-for="(order, index) in previews" :key="order.orderId">
-          <transition name="fade" v-if="index <= 13">
+        <va-list-item style="width: 49%;" v-for="(order) in previews" :key="order.orderId">
             <div v-if="order.orderNumber">
               <div class="row">
                 <div class=" md4">
@@ -22,7 +21,6 @@
               </div>
               <va-list-separator spaced />
             </div>
-          </transition>
         </va-list-item>
       </div><!-- twoColContainer -->
     </va-card-content>
@@ -117,7 +115,7 @@ export default {
       const jwtToken = session.getAccessToken().jwtToken
 
       try {
-        const { data } = await axios.get(`${this.$ordersAPIurl}/orders?state=CREATED`, {
+        const { data } = await axios.get(`${this.$orderManagerEndpoint}/orders?state=CREATED`, {
           headers: { Authorization: "Bearer " + jwtToken }
         })
         console.log("orders", data)

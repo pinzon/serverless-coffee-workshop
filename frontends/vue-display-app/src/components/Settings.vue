@@ -1,129 +1,133 @@
 <template>
   <div class="row parent">
     <div class="flex md6 lg6">
-        <va-card :bordered="false" style="margin-top: 20px;">
-          <va-card-title>Add your backend settings</va-card-title>
-          <va-card-content>Enter the environment variables and stack parameters from your backend.</va-card-content>
+      <va-card :bordered="false" style="margin-top: 20px;">
+        <va-card-title>Add your backend settings</va-card-title>
+        <va-card-content>
+          Enter the environment variables and stack parameters from your backend.
+        </va-card-content>
 
-          <!-- Fields -->
-          <div class="row flex" style="margin: 20px;">
-            <va-input
-              style="font-size: 24px;"
-              label="Region (e.g. us-west-2)"
-              v-model.trim="region"
-            />
-          </div>
-          <div class="row flex" style="margin: 20px;">
-            <va-input
-              style="font-size: 24px;"
-              label="API URL"
-              v-model.trim="APIurl"
-            />
-          </div>
-          <div class="row flex" style="margin: 20px;">
-            <va-input
-              style="font-size: 24px;"
-              label="Config URL"
-              v-model.trim="ordersAPIurl"
-            />
-          </div>
-          <div class="row flex" style="margin: 20px;">
-            <va-input
-              style="font-size: 24px;"
-              label="Host"
-              v-model.trim="host"
-            />
-          </div>
-          <div class="row flex" style="margin: 20px;">
-            <va-input
-              style="font-size: 24px;"
-              label="Config endpoint"
-              v-model.trim="ConfigEndpoint"
-            />
-          </div>
-          <div class="row flex" style="margin: 20px;">
-            <va-input
-              style="font-size: 24px;"
-              label="User Pool Client Id"
-              v-model.trim="poolId"
-            />
-          </div>
+        <!-- Input Fields -->
+        <div class="row flex" style="margin: 20px;">
+          <va-input
+            style="font-size: 24px;"
+            label="Region (e.g. us-east-1)"
+            v-model.trim="region"
+          />
+        </div>
 
-          <!-- Save button -->
-          <div class="row flex">
-            <div class="row flex" style="margin: 20px;">
-              <va-button
-                :rounded="false"
-                @click="saveLocalStorage"
-                class="mr-2">
-                  Save and reload
-              </va-button>
-            </div>
-          </div>
-        </va-card>
+        <div class="row flex" style="margin: 20px;">
+          <va-input
+            style="font-size: 24px;"
+            label="User Pool Id"
+            v-model.trim="userPoolId"
+          />
+        </div>
+
+        <div class="row flex" style="margin: 20px;">
+          <va-input
+            style="font-size: 24px;"
+            label="User Pool Web Client Id"
+            v-model.trim="userPoolWebClientId"
+          />
+        </div>
+
+        <div class="row flex" style="margin: 20px;">
+          <va-input
+            style="font-size: 24px;"
+            label="Identity Pool Id"
+            v-model.trim="identityPoolId"
+          />
+        </div>
+
+        <div class="row flex" style="margin: 20px;">
+          <va-input
+            style="font-size: 24px;"
+            label="Order Manager Endpoint"
+            v-model.trim="orderManagerEndpoint"
+          />
+        </div>
+
+        <div class="row flex" style="margin: 20px;">
+          <va-input
+            style="font-size: 24px;"
+            label="Validator Service Endpoint"
+            v-model.trim="APIGWEndpointValidatorService"
+          />
+        </div>
+
+        <div class="row flex" style="margin: 20px;">
+          <va-input
+            style="font-size: 24px;"
+            label="Config Service Endpoint"
+            v-model.trim="APIGWEndpointConfigService"
+          />
+        </div>
+
+        <div class="row flex" style="margin: 20px;">
+          <va-input
+            style="font-size: 24px;"
+            label="IoT Host"
+            v-model.trim="IoTHost"
+          />
+        </div>
+
+        <!-- Save Button -->
+        <div class="row flex" style="margin: 20px;">
+          <va-button
+            :rounded="false"
+            @click="saveLocalStorage"
+            class="mr-2">
+            Save and reload
+          </va-button>
+        </div>
+      </va-card>
     </div>
   </div>
 </template>
 
 <script>
-/*! Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *  SPDX-License-Identifier: MIT-0
- */
-
-'use strict'
-
 export default {
-  name: 'Auth',
+  name: 'Settings',
   data() {
     return {
-      APIurl: '',
       region: '',
-      ordersAPIurl: '',
-      poolId: '',
-      APIconfigURL: '',
-      ConfigEndpoint: '',
-      host: ''
+      userPoolId: '',
+      userPoolWebClientId: '',
+      identityPoolId: '',
+      orderManagerEndpoint: '',
+      APIGWEndpointValidatorService: '',
+      APIGWEndpointConfigService: '',
+      IoTHost: ''
     }
   },
   async mounted () {
-    if (localStorage.UIstate) {
-      const UIstate = JSON.parse(localStorage.UIstate)
-      console.log('Mounted - Local storage: ', UIstate)
-      this.APIurl = UIstate.APIurl || '',
-      this.region = UIstate.region || '',
-      this.ordersAPIurl = UIstate.ordersAPIurl || '',
-      this.poolId = UIstate.poolId || '',
-      this.APIconfigURL = UIstate.APIconfigURL || '',
-      this.ConfigEndpoint = UIstate.ConfigEndpoint || '',
-      this.host = UIstate.host || ''
-    }
+     const params = new URLSearchParams(window.location.search)
+     const UIstate = localStorage.UIstate ? JSON.parse(localStorage.UIstate) : {}
+     this.region = params.get('region') || UIstate.region || ''
+     this.userPoolId = params.get('userPoolId') || UIstate.userPoolId || ''
+     this.userPoolWebClientId = params.get('userPoolWebClientId') || UIstate.userPoolWebClientId || ''
+     this.identityPoolId = params.get('identityPoolId') || UIstate.identityPoolId || ''
+     this.orderManagerEndpoint = params.get('orderManagerEndpoint') || UIstate.orderManagerEndpoint || ''
+     this.APIGWEndpointValidatorService = params.get('APIGWEndpointValidatorService') || UIstate.APIGWEndpointValidatorService || ''
+     this.APIGWEndpointConfigService = params.get('APIGWEndpointConfigService') || UIstate.APIGWEndpointConfigService || ''
+     this.IoTHost = params.get('IoTHost') || UIstate.IoTHost || ''
   },
   methods: {
     saveLocalStorage () {
       const UIstate = {
-        APIurl: this.APIurl,
         region: this.region,
-        ordersAPIurl: this.ordersAPIurl,
-        poolId: this.poolId,
-        APIconfigURL: this.APIconfigURL,
-        ConfigEndpoint: this.ConfigEndpoint,
-        host: this.host
+        userPoolId: this.userPoolId,
+        userPoolWebClientId: this.userPoolWebClientId,
+        identityPoolId: this.identityPoolId,
+        orderManagerEndpoint: this.orderManagerEndpoint,
+        APIGWEndpointValidatorService: this.APIGWEndpointValidatorService,
+        APIGWEndpointConfigService: this.APIGWEndpointConfigService,
+        IoTHost: this.IoTHost
       }
-      console.log('Saving Local storage: ', UIstate)
-
       localStorage.UIstate = JSON.stringify(UIstate)
-      console.log('Saving: ', UIstate)
-      // Reload page
-      window.location.reload()
+      location.reload()
     }
   }
 }
 </script>
-<style>
-.parent {
-  display: flex;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
-}
-</style>
