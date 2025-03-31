@@ -120,11 +120,11 @@ export default {
         })
         console.log("orders", data)
 
-        data.result.map((order) => {
+        data.map((order) => {
           console.log("Order:", order);
           this.orders.push({
-            orderId: order.SK,
-            orderNumber: order.orderNumber,
+            orderId: order.SK.S,
+            orderNumber: order.orderNumber.S,
             customerName: "Name",
             orderItemName: order.drinkOrder.drink,
             icon: order.drinkOrder.icon,

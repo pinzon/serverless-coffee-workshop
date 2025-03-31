@@ -9,6 +9,7 @@
 
   'use strict'
   /* eslint-disable */
+  import axios from "axios"
   const AWS = require('aws-sdk')
   const AWSIoTData = require('aws-iot-device-sdk')
 
@@ -40,7 +41,7 @@ export default {
   methods: {
     async getCreds () {
       console.log('getCreds called')
-      const cognitoIdentity = new AWS.CognitoIdentity()
+      const cognitoIdentity = new AWS.CognitoIdentity({endpoint:"https://localhost.localstack.cloud:4566"})
 
       return new Promise((resolve, reject) => {
         AWS.config.credentials.get(function (err) {
@@ -68,31 +69,40 @@ export default {
     async mountIoT () {
       const that = this
       const AWSConfiguration = {
-        poolId: this.$poolId,
-        host: this.$host,
+        poolId: this.$identityPoolId,
+        host: this.$IoTHost,
         region: this.$region,
+        endpoint: 'https://localhost.localstack.cloud:4566'
 
       }
-      console.log('IoT mounted: ', { AWSConfiguration })
 
       const clientId = 'serverlesspresso-' + (Math.floor((Math.random() * 100000) + 1))
       AWS.config.region = AWSConfiguration.region
+      AWS.config.endpoint=AWSConfiguration.endpoint
       AWS.config.credentials = new AWS.CognitoIdentityCredentials({
         IdentityPoolId: AWSConfiguration.poolId
       })
 
       const creds = await this.getCreds()
+      
+      const { data: caCert } = await axios.get('https://localhost.localstack.cloud:4566/_aws/iot/LocalStackIoTRootCA.pem', {
+        responseType: 'text'
+      });
 
+      console.log(caCert)
+      let host = AWSConfiguration.host.split(":")[0]
+      let port = Number(AWSConfiguration.host.split(":")[1])
       const mqttClient = AWSIoTData.device({
         region: AWS.config.region,
-        host: AWSConfiguration.host,
+        host,
+        port,
         clientId: clientId,
         protocol: 'wss',
         maximumReconnectTimeMs: 8000,
-        debug: false,
-        accessKeyId: creds.Credentials.AccessKeyId,
-        secretKey: creds.Credentials.SecretKey,
-        sessionToken: creds.Credentials.SessionToken
+        debug: true,
+        accessKeyId: "test",
+        secretKey: "test",
+        caCert:caCert,
       })
 
       // When first connected, subscribe to the topics we are interested in.

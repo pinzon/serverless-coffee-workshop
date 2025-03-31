@@ -4,10 +4,8 @@
     <!-- Tokens available -->
     <div v-show="isRefreshing && availableTokens > 0">
       <div class="mb-2" @click="toggleDebuggingInfo">
-        <transition name="fade" class="pl-2 mr-2">
           <qrcode-vue :size="getQRwidth()" :value="getQRURL()" />
           <!-- <p>last_code</p> -->
-        </transition>
         <!-- <p v-show="availableTokens>0">Code is <code>{{ last_code }}</code> - expires in {{ getSeconds() }} seconds.</p> -->
         <va-progress-bar color="#08c18a" :model-value="getPctProdComplete()" />
       </div>
@@ -62,7 +60,8 @@ export default {
       remaining_ms: 0,
       availableTokens: 0,
       isActive: false,
-      intervalRef: undefined
+      intervalRef: undefined,
+      showDebuggingInfo: false,
     }
   },
   components: {

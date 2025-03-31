@@ -92,6 +92,7 @@ import Authentication from "./components/Auth"
 //import LottieAnimation from "lottie-vuejs/src/LottieAnimation.vue"; // import lottie-vuejs
 import LottieAnimation from "lottie-web-vue/src/lottie-web-vue.vue";
 
+import Auth from "@aws-amplify/auth"
 // Timer interval to calculate remaining period
 
 export default {
@@ -158,7 +159,14 @@ export default {
     async getConfig() {
       console.log("getConfig started");
       try {
-        const { data } = await axios.get(`${this.$ConfigEndpoint}`);
+
+        const session = await Auth.currentSession()
+        const jwtToken = session.getAccessToken().jwtToken
+        const { data } = await axios.get(`${this.$APIGWEndpointConfigService}/config`,
+          {
+            headers: { Authorization: "Bearer " + jwtToken },
+          }
+        );
         console.log("Config: ", data);
 
         data.map((item) => {

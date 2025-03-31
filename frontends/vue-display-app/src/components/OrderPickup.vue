@@ -77,11 +77,11 @@ export default {
         )
         console.log("Pickup orders", data)
 
-        data.result.map((order) => {
+        data.map((order) => {
           if (order.drinkOrder) {
             this.orders.push({
-              orderId: order.SK,
-              orderNumber: order.orderNumber,
+              orderId: order.SK.S,
+              orderNumber: order.orderNumber.S,
               customerName: "Name",
               orderItemName: order.drinkOrder.drink,
               icon: order.drinkOrder.icon,
