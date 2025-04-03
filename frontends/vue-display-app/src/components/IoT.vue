@@ -12,6 +12,8 @@
   import axios from "axios"
   const AWS = require('aws-sdk')
   const AWSIoTData = require('aws-iot-device-sdk')
+  import { mqtt, iot, auth } from "aws-iot-device-sdk-v2";
+
 
   const topics = [
      'serverlesspresso-admin',
@@ -92,41 +94,81 @@ export default {
       console.log(caCert)
       let host = AWSConfiguration.host.split(":")[0]
       let port = Number(AWSConfiguration.host.split(":")[1])
-      const mqttClient = AWSIoTData.device({
+    const mqttclient = AWSIoTData.device({
         region: AWS.config.region,
         host,
         port,
         clientId: clientId,
         protocol: 'wss',
-        maximumReconnectTimeMs: 8000,
+        maximumReconnectTimems: 8000,
         debug: true,
         accessKeyId: "test",
         secretKey: "test",
-        caCert:caCert,
+        sessionToken: "test",
+        caCert
       })
 
-      // When first connected, subscribe to the topics we are interested in.
-      mqttClient.on('connect', function () {
-        console.log('mqttClient connected')
-        topics.map((topic) => mqttClient.subscribe(topic))
+      // when first connected, subscribe to the topics we are interested in.
+      mqttclient.on('connect', function () {
+        console.log('mqttclient connected')
+        topics.map((topic) => mqttclient.subscribe(topic))
       })
-      // Attempt to reconnect in the event of any error
-      mqttClient.on('error', async function (err) {
-        console.log('mqttClient error:', err)
+      // attempt to reconnect in the event of any error
+      mqttclient.on('error', async function (err) {
+        console.log('mqttclient error:', err)
 
-        // Update creds
-        const data = await that.getCreds()
-        mqttClient.updateWebSocketCredentials(data.Credentials.AccessKeyId,
-          data.Credentials.SecretKey,
-          data.Credentials.SessionToken)
+        // update creds
+        const data = await that.getcreds()
+        mqttclient.updatewebsocketcredentials(data.credentials.accesskeyid,
+          data.credentials.secretkey,
+          data.credentials.sessiontoken)
       })
 
-      // A message has arrived - parse to determine topic
-      mqttClient.on('message', function (topic, payload) {
-        const payloadEnvelope = JSON.parse(payload.toString())
-        console.log('IoT::onMessage: ', topic, payloadEnvelope)
-        that.emitter.emit('message', payloadEnvelope)
+      // a message has arrived - parse to determine topic
+      mqttclient.on('message', function (topic, payload) {
+        const payloadenvelope = json.parse(payload.tostring())
+        console.log('iot::onmessage: ', topic, payloadenvelope)
+        that.emitter.emit('message', payloadenvelope)
       })
+      //   let provider = {
+      //     aws_credentials: {
+      //        aws_region: 'us-east-1',
+      //         aws_access_id : "test",
+      //         aws_secret_key: "test",
+      //         aws_sts_token: "test"
+      //     }
+      //   }      
+
+      
+      //  let config = iot.AwsIotMqttConnectionConfigBuilder.new_websocket_builder()
+      //     .with_clean_session(true)
+      //     .with_credentials("us-east-1", "test", "test")
+      //     .with_port(4510)
+      //     .with_endpoint(host)
+      //     .with_custom_authorizer()
+      //     .build()
+
+      // console.log("Connecting websocket...", config);
+      // const client = new mqtt.MqttClient();
+
+      // const connection = client.new_connection(config);
+      // connection.on("connect", (session_present) => {
+      //   resolve(connection);
+      // });
+      // connection.on("interrupt", (error) => {
+      //   console.log(`Connection interrupted: error=${error}`);
+      // });
+      // connection.on("resume", (return_code, session_present) => {
+      //   console.log(`Resumed: rc: ${return_code} existing session: ${session_present}`);
+      // });
+      // connection.on("disconnect", () => {
+      //   console.log("Disconnected");
+      // });
+      // connection.on("error", (error) => {
+      //   reject(error);
+      // });
+      // connection.connect();
+      
     }
   }
 }
